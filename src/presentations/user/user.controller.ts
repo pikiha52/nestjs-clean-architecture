@@ -1,16 +1,24 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
-  HttpStatus,
   Inject,
+  Param,
   Post,
+  Put,
 } from '@nestjs/common';
-import { CreateUserUserUseCases } from 'src/applications/use-cases/user-create.usecase';
-import { GetAllUserUseCases } from 'src/applications/use-cases/user.usecase';
-import { UseCaseProxy } from 'src/infrastructures/usecase-proxy/usecase-proxy';
-import { UsecaseProxyModule } from 'src/infrastructures/usecase-proxy/usecase-proxy.module';
+import { CreateUserUserUseCases } from '../..//applications/use-cases/user-create.usecase';
+import { GetAllUserUseCases } from '../../applications/use-cases/user.usecase';
+import { UseCaseProxy } from '../../infrastructures/usecase-proxy/usecase-proxy';
+import { UsecaseProxyModule } from '../../infrastructures/usecase-proxy/usecase-proxy.module';
 import { CreateUserDto } from './dto/create.dto';
+import { ShowUserUseCases } from '../../applications/use-cases/user-show.usecase';
+import { ObjectIdTransformPipe } from '../../applications/transform/objectId.transform.pipe';
+import { Types } from 'mongoose';
+import { UpdateUserDto } from './dto/update.dto';
+import { UpdateUserUseCase } from 'src/applications/use-cases/update.usecase';
+import { DeleteUserUseCases } from 'src/applications/use-cases/delete-user.usecase';
 
 @Controller('user')
 export class UserController {
@@ -19,29 +27,43 @@ export class UserController {
     private readonly getUserUseCaseProxy: UseCaseProxy<GetAllUserUseCases>,
     @Inject(UsecaseProxyModule.CREATE_ONE_USER_USE_CASE)
     private readonly createUserUseCaseProxy: UseCaseProxy<CreateUserUserUseCases>,
+    @Inject(UsecaseProxyModule.SHOW_USER_USE_CASE)
+    private readonly shoUserUseCaseProxy: UseCaseProxy<ShowUserUseCases>,
+    @Inject(UsecaseProxyModule.UPDATE_USER_USE_CASE)
+    private readonly updateUserUseCaseProxy: UseCaseProxy<UpdateUserUseCase>,
+    @Inject(UsecaseProxyModule.DELETE_USER_USE_CASE)
+    private readonly deleteUserUseCaseProxy: UseCaseProxy<DeleteUserUseCases>,
   ) {}
 
   @Get('')
   async getAllUsers() {
-    const results = await this.getUserUseCaseProxy.getInstance().execute();
-    return {
-      status: 'OK',
-      code: HttpStatus.OK,
-      message: 'Success',
-      data: results,
-    };
+    return await this.getUserUseCaseProxy.getInstance().execute();
   }
 
   @Post('')
   async createUser(@Body() createDto: CreateUserDto) {
-    const results = await this.createUserUseCaseProxy
+    return await this.createUserUseCaseProxy.getInstance().execute(createDto);
+  }
+
+  @Get(':id')
+  async showUser(@Param('id', ObjectIdTransformPipe) id: Types.ObjectId) {
+    return await this.shoUserUseCaseProxy.getInstance().execute(id);
+  }
+
+  @Put(':id')
+  async updateUser(
+    @Param('id', ObjectIdTransformPipe) id: Types.ObjectId,
+    @Body() updateDto: UpdateUserDto,
+  ) {
+    return await this.updateUserUseCaseProxy
       .getInstance()
-      .execute(createDto);
-    return {
-      status: 'CREATE',
-      code: HttpStatus.CREATED,
-      message: 'Success',
-      data: results,
-    };
+      .execute(id, updateDto);
+  }
+
+  @Delete(':id')
+  async deleteUser(
+    @Param('id', ObjectIdTransformPipe) id: Types.ObjectId,
+  ): Promise<Types.ObjectId> {
+    return await this.deleteUserUseCaseProxy.getInstance().execute(id);
   }
 }

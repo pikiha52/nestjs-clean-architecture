@@ -1,30 +1,15 @@
-import {
-  Column,
-  CreateDateColumn,
-  Entity,
-  Index,
-  PrimaryGeneratedColumn,
-  UpdateDateColumn,
-} from 'typeorm';
+import { Column, Entity, ObjectId, ObjectIdColumn } from 'typeorm';
 
 @Entity('users')
 export class User {
-  @PrimaryGeneratedColumn('increment')
-  id: number;
+  @ObjectIdColumn() id: ObjectId;
+  @Column() email: string;
+  @Column() name: string;
+  @Column() password: string;
+  @Column({ default: Date.now }) created_at: Date;
+  @Column({ default: Date.now }) updated_at: Date;
 
-  @Index({ unique: true })
-  @Column('varchar', { unique: true })
-  email: string;
-
-  @Column('varchar')
-  name: string;
-
-  @Column('varchar')
-  password: string;
-
-  @CreateDateColumn({ name: 'created_at' })
-  created_at: Date;
-
-  @UpdateDateColumn({ name: 'updated_at' })
-  updated_at: Date;
+  constructor(user?: Partial<User>) {
+    Object.assign(this, user);
+  }
 }

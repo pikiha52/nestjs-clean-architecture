@@ -3,17 +3,13 @@ import * as dotenv from 'dotenv';
 dotenv.config();
 
 const config = new DataSource({
-  type: 'postgres',
-  host: process.env.DATABASE_HOST,
-  port: 5432,
-  username: process.env.DATABASE_USER,
-  password: process.env.DATABASE_PASSWORD,
-  database: process.env.DATABASE_NAME,
+  type: 'mongodb',
+  url: 'mongodb://localhost:27017',
+  database: 'clean_db',
   entities: [__dirname + './../../**/*.entity{.ts,.js}'],
-  synchronize: true,
-  schema: process.env.DATABASE_SCHEMA,
-  migrationsRun: true,
-  migrations: ['database/migrations/**/*{.ts,.js}'],
+  ssl: false,
+  useUnifiedTopology: true,
+  useNewUrlParser: true,
 });
 
 config

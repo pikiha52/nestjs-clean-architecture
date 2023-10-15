@@ -1,5 +1,7 @@
+import { ObjectId } from 'typeorm';
+
 export class UserM {
-  id: number;
+  id: ObjectId;
   email: string;
   name: string;
   password: string;
